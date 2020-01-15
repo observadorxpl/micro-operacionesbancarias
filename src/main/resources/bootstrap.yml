@@ -1,0 +1,1 @@
+spring:  application:    name: micro-operacionesbancarias   cloud:    config:      uri:      - http://localhost:8888
