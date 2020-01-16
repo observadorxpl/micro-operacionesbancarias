@@ -15,6 +15,10 @@ public interface IClienteProductoService extends ICRUD<ClienteProductoBancario>{
 	public Flux<CuentaBancaria> saveClienteProductoDTOv3(ClienteProductosBancarioDTO dto);
 	public Flux<CuentaBancaria> saveClienteProductoDTOv4(ClienteProductosBancarioDTO dto);
 
+	
+	public Mono<ClienteProductoBancario> saveClienteProductoBancario(ClienteProductoBancario clienteProducto);
+
+	public Flux<ClienteProductoBancario> findByCliente(String idCliente);
 	public Mono<ClienteProductosBancarioDTO> findByCliente(Cliente cliente);
 	public Mono<ClienteProductosBancarioDTO> findByClientev2(Cliente cliente);
 

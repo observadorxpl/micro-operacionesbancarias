@@ -21,29 +21,25 @@ public class MovimientoBancario {
 	@Id
 	private String IdMovimiento;
 	
-
-	private CuentaBancaria cuentaBancaria;
+	private String numeroCuentaOrigen;
 	
-	private Cliente cliente;
+	private ClienteProductoBancario clienteProductoBancario;
 	
 	private double monto;
 	
-	@NotEmpty
-	private String tipoMovimiento;
+	@NotEmpty // RETIRO, DEPOSITO, ETC
+	private String tipoOperacion;
 	
 	@NotEmpty
 	private Date fechaMovimiento;
 
-	public MovimientoBancario(CuentaBancaria cuentaBancaria, Cliente cliente, double monto, @NotEmpty String tipoMovimiento,
-			@NotEmpty Date fechaMovimiento) {
+	public MovimientoBancario(String numeroCuentaOrigen, ClienteProductoBancario clienteProductoBancario, double monto,
+			@NotEmpty String tipoOperacion, @NotEmpty Date fechaMovimiento) {
 		super();
-		this.cuentaBancaria = cuentaBancaria;
-		this.cliente = cliente;
+		this.numeroCuentaOrigen = numeroCuentaOrigen;
+		this.clienteProductoBancario = clienteProductoBancario;
 		this.monto = monto;
-		this.tipoMovimiento = tipoMovimiento;
+		this.tipoOperacion = tipoOperacion;
 		this.fechaMovimiento = fechaMovimiento;
 	}
-
-
-	
 }

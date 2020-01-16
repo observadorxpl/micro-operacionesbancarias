@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.operacionbancario.app.business.IOperacionesService;
-import com.operacionbancario.app.models.CuentaBancaria;
+import com.operacionbancario.app.models.MovimientoBancario;
 import com.operacionbancario.app.models.OperacionBancariaDTO;
 
 import reactor.core.publisher.Mono;
@@ -21,12 +21,12 @@ public class OperacionesRestController {
 	private IOperacionesService operacionesService;
 	
 	@PostMapping(value = "/deposito")
-	public Mono<CuentaBancaria> deposito(@RequestBody @Valid OperacionBancariaDTO dto){
+	public Mono<MovimientoBancario> deposito(@RequestBody @Valid OperacionBancariaDTO dto){
 		return operacionesService.deposito(dto);
 	}
 	
 	@PostMapping(value = "/retiro")
-	public Mono<CuentaBancaria> retiro(@RequestBody @Valid OperacionBancariaDTO dto){
+	public Mono<MovimientoBancario> retiro(@RequestBody @Valid OperacionBancariaDTO dto){
 		return operacionesService.retiro(dto);
 	}
 }

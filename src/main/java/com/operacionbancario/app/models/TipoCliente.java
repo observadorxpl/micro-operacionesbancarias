@@ -21,10 +21,17 @@ public class TipoCliente {
 	
 	@NotEmpty
 	private String descripcion;
+	
+	@NotEmpty
+	private Integer codigoTipoCliente;
 
-	public TipoCliente(@NotEmpty String descripcion) {
+	public TipoCliente(@NotEmpty String descripcion, @NotEmpty Integer codigoTipoCliente) {
 		super();
 		this.descripcion = descripcion;
+		this.codigoTipoCliente = codigoTipoCliente;
 	}
-	
+
+
+
+
 }

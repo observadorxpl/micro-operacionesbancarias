@@ -1,12 +1,9 @@
 package com.operacionbancario.app.business;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.netflix.discovery.shared.Application;
 import com.operacionbancario.app.models.Cliente;
 import com.operacionbancario.app.models.MovimientoBancario;
 import com.operacionbancario.app.repository.IMovimientoRepo;
@@ -16,7 +13,6 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class MovimientoServiceImpl implements IMovimientoService{
-	private static final Logger LOG = LoggerFactory.getLogger(Application.class);
 	@Autowired
 	private IMovimientoRepo movimientoRepo;
 	
@@ -62,7 +58,7 @@ public class MovimientoServiceImpl implements IMovimientoService{
 			return Flux.just(c);
 		})
 		.flatMap(c -> {
-			return movimientoRepo.findByCliente(c);
+			return movimientoRepo.buscarPorIdCliente(c.getIdCliente());
 		});
 	}
 

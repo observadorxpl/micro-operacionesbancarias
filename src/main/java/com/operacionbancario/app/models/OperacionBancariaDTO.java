@@ -1,5 +1,6 @@
 package com.operacionbancario.app.models;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
@@ -12,8 +13,14 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class OperacionBancariaDTO {
-	@NotNull
-	private CuentaBancaria cuentaBancaria;
+	@NotEmpty(message = "El numero de cuenta origen no puede ser nulo o estar en blanco")
+	private String numeroCuentaOrigen;
+	//@NotEmpty(message = "El numero de cuenta destino no puede ser nulo o estar en blanco")
+	private String numeroCuentaDestino;
+	//@NotEmpty(message = "El numero de cuenta CCI destino no puede ser nulo o estar en blanco")
+	private String numeroCuentaCCIDestino;
+	@NotEmpty
+	private String tipoOperacion;
 	@NotNull
 	private double monto;
 }

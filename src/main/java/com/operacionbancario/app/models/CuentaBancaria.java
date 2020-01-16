@@ -3,6 +3,7 @@ package com.operacionbancario.app.models;
 import java.util.Random;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -36,14 +37,20 @@ public class CuentaBancaria {
 	private String tipoCuenta; /// Uhmmm
 	@NotEmpty
 	private boolean estado;
+	@NotNull
+	private TipoProducto tipoProducto;
 	
+	@NotEmpty
+	private Integer contadorCuenta;
 	@Transient
 	@JsonIgnore
     private Random random;
     
-	public CuentaBancaria(Cliente cliente) {
+	public CuentaBancaria(Cliente cliente, TipoProducto tipoProducto,  Integer contadorCuenta) {
 		super();
 		this.cliente = cliente;
+		this.tipoProducto = tipoProducto;
+		this.contadorCuenta = contadorCuenta;
 	}
 
 	public String generarNumeroCuenta(String bin, int length) {

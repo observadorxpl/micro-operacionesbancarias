@@ -1,33 +1,35 @@
 package com.operacionbancario.app.expose;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.operacionbancario.app.business.IClienteProductoService;
-import com.operacionbancario.app.models.ClienteProductosBancarioDTO;
-import com.operacionbancario.app.models.CuentaBancaria;
+import com.operacionbancario.app.models.ClienteProductoBancario;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/clientesProductos")
+@RequestMapping("/clientes-productos")
 public class ClienteProductosRestController {
 	@Autowired
 	private IClienteProductoService clienteProductosService;
 	
-	@GetMapping
-	public Mono<ClienteProductosBancarioDTO> listarProductoxCliente(ClienteProductosBancarioDTO dto) {
-		return clienteProductosService.findByCliente(dto.getCliente());
+	@GetMapping("/{idCliente}")
+	public Flux<ClienteProductoBancario> listarProductoxCliente(@PathVariable String idCliente) {
+		return clienteProductosService.findByCliente(idCliente);
 	}
 	
 	@PostMapping
-	public Flux<CuentaBancaria> registrarClienteProductosBancarios(@RequestBody ClienteProductosBancarioDTO clienteProductoDTO) {
-		return clienteProductosService.saveClienteProductoDTOv2(clienteProductoDTO);
+	public Mono<ClienteProductoBancario> registrarClienteProductosBancarios(@RequestBody @Valid ClienteProductoBancario clienteProductoBancario) {
+		return clienteProductosService.saveClienteProductoBancario(clienteProductoBancario);
 	}
 	/*
 	@Autowired
