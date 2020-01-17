@@ -28,7 +28,7 @@ public class ClienteProductosRestController {
 	}
 	
 	@PostMapping
-	public Mono<ClienteProductoBancario> registrarClienteProductosBancarios(@RequestBody @Valid ClienteProductoBancario clienteProductoBancario) {
+	public Mono<ClienteProductoBancario> registrarClienteProductoBancario(@RequestBody @Valid ClienteProductoBancario clienteProductoBancario) {
 		return clienteProductosService.saveClienteProductoBancario(clienteProductoBancario);
 	}
 	/*

@@ -24,7 +24,7 @@ public class OperacionesServiceImpl implements IOperacionesService{
 	public Mono<MovimientoBancario> retiro(OperacionBancariaDTO dto) {
 		return clienteProductoRepo.findByNumeroCuenta(dto.getNumeroCuentaDestino())
 		.flatMap(c -> {
-			if(c.getSaldo() > dto.getMonto()) {
+			if(c.getSaldo() >= dto.getMonto()) {
 				c.setSaldo(c.getSaldo() - dto.getMonto());
 				return clienteProductoRepo.save(c);
 			}
