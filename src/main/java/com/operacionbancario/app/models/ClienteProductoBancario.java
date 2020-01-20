@@ -30,12 +30,14 @@ public class ClienteProductoBancario {
 	private Cliente cliente;
 	@NotNull(message = "El producto Bancario no puede ser nulo")
 	private ProductoBancario productoBancario;
-
+	
+	
 	private String numeroCuenta;
-
+	
 	private String numeroCuentaCCI;
+	
 	private String clave;
-
+	
 	private Double saldo;
 	@NotNull(message = "El estado no puede ser nulo")
 	private boolean estado;

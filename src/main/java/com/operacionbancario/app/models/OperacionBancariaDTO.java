@@ -3,6 +3,8 @@ package com.operacionbancario.app.models;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,4 +25,8 @@ public class OperacionBancariaDTO {
 	private String tipoOperacion;
 	@NotNull
 	private double monto;
+	
+	private double interes;
+	@JsonIgnore
+	private Long count;
 }

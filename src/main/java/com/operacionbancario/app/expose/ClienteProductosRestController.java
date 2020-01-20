@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.operacionbancario.app.business.IClienteProductoService;
 import com.operacionbancario.app.models.ClienteProductoBancario;
+import com.operacionbancario.app.models.ReporteProductoSaldoDTO;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -25,6 +26,11 @@ public class ClienteProductosRestController {
 	@GetMapping("/{idCliente}")
 	public Flux<ClienteProductoBancario> listarProductoxCliente(@PathVariable String idCliente) {
 		return clienteProductosService.findByCliente(idCliente);
+	}
+	
+	@GetMapping("/reporte/{idCliente}")
+	public Flux<ReporteProductoSaldoDTO> reporteProductosSaldo(@PathVariable String idCliente) {
+		return clienteProductosService.reporteProductosSaldo(idCliente);
 	}
 	
 	@PostMapping

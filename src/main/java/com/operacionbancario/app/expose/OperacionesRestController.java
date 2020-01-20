@@ -22,11 +22,11 @@ public class OperacionesRestController {
 	
 	@PostMapping(value = "/deposito")
 	public Mono<MovimientoBancario> deposito(@RequestBody @Valid OperacionBancariaDTO dto){
-		return operacionesService.deposito(dto);
+		return operacionesService.depositoV2(dto);
 	}
 	
 	@PostMapping(value = "/retiro")
 	public Mono<MovimientoBancario> retiro(@RequestBody @Valid OperacionBancariaDTO dto){
-		return operacionesService.retiro(dto);
+		return operacionesService.retiroV3(dto);
 	}
 }

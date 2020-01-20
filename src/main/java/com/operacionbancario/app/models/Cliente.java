@@ -23,22 +23,4 @@ public class Cliente {
 	private String dni;
 
 	private TipoCliente tipoCliente;
-
-	public Cliente(String nombreCompleto, String apellidoPaterno, String apellidoMaterno, String dni,
-			TipoCliente tipoCliente) {
-		super();
-		this.nombreCompleto = nombreCompleto;
-		this.apellidoPaterno = apellidoPaterno;
-		this.apellidoMaterno = apellidoMaterno;
-		this.dni = dni;
-		this.tipoCliente = tipoCliente;
-	}
-	
-	
-	
-	
-
-
-
-	
 }

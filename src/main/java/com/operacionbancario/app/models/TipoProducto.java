@@ -22,9 +22,4 @@ public class TipoProducto {
 	@NotEmpty
 	private String descripcion;
 
-	public TipoProducto(@NotEmpty String descripcion) {
-		super();
-		this.descripcion = descripcion;
-	}
-	
 }
