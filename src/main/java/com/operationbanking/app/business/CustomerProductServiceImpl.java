@@ -1,6 +1,7 @@
 package com.operationbanking.app.business;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -18,7 +19,10 @@ public class CustomerProductServiceImpl implements ICustomerProductService {
 
 	@Autowired
 	private ICustomerBankingProductRepository customerProductRepo;
-
+	
+	@Value("${com.bootcamp.gateway.url}")
+	private String gatewayUrlPort;
+	
 	@Override
 	public Flux<CustomerBankingProduct> findAll() {
 		return customerProductRepo.findAll();
@@ -46,7 +50,7 @@ public class CustomerProductServiceImpl implements ICustomerProductService {
 
 	@Override
 	public Flux<ReporteProductoSaldoDTO> reporteProductosSaldo(String idCliente) {
-		return WebClient.builder().baseUrl("http://servicio-zuul-server:8099/micro-clientes/customers/").build().get()
+		return WebClient.builder().baseUrl("http://"+gatewayUrlPort+"/micro-clientes/customers/").build().get()
 				.uri(idCliente).retrieve().bodyToMono(Customer.class).log().flatMapMany(cli -> {
 					return customerProductRepo.findByCustomer(cli);
 				}).flatMap(clPro -> {
@@ -57,7 +61,7 @@ public class CustomerProductServiceImpl implements ICustomerProductService {
 
 	@Override
 	public Flux<CustomerBankingProduct> findByCliente(String idCliente) {
-		return WebClient.builder().baseUrl("http://servicio-zuul-server:8099/micro-clientes/customers/").build().get()
+		return WebClient.builder().baseUrl("http://"+gatewayUrlPort+"/micro-clientes/customers/").build().get()
 				.uri(idCliente).retrieve().bodyToMono(Customer.class).log().flatMapMany(cli -> {
 					return customerProductRepo.findByCustomer(cli);
 				});
@@ -65,11 +69,11 @@ public class CustomerProductServiceImpl implements ICustomerProductService {
 
 	@Override
 	public Mono<CustomerBankingProduct> saveClienteProductoBancario(CustomerBankingProduct clienteProducto) {
-		return WebClient.builder().baseUrl("http://servicio-zuul-server:8099/micro-clientes/customers/").build().get()
+		return WebClient.builder().baseUrl("http://"+gatewayUrlPort+"/micro-clientes/customers/").build().get()
 				.uri(clienteProducto.getCustomer().getIdCustomer()).retrieve().bodyToMono(Customer.class).log()
 				.flatMap(cl -> {
 					clienteProducto.setCustomer(cl);
-					return WebClient.builder().baseUrl("http://servicio-zuul-server:8099/micro-bancario/products/").build().get()
+					return WebClient.builder().baseUrl("http://"+gatewayUrlPort+"/micro-bancario/products/").build().get()
 							.uri(clienteProducto.getBankingProduct().getIdProduct()).retrieve()
 							.bodyToMono(BankingProduct.class).log();
 				}).flatMap(p -> {
@@ -77,9 +81,10 @@ public class CustomerProductServiceImpl implements ICustomerProductService {
 					return customerProductRepo
 							.buscarPorCodigoTipoClienteIdTipoProducto(clienteProducto.getCustomer().getIdCustomer(),
 									clienteProducto.getCustomer().getCustomerType().getCustomerTypeCode(),
-									clienteProducto.getBankingProduct().getProductCode())
+									clienteProducto.getBankingProduct().getProductCode()).doOnNext(clPro -> System.out.println("[customerProductRepo]: "+clPro))
 							.count();
 				}).flatMap(count -> {
+					System.out.println("[count]" + count);
 					// SI EL CLIENTE ES PERSONAL
 					if (clienteProducto.getCustomer().getCustomerType().getCustomerTypeCode() == 2) {
 						if (clienteProducto.getBankingProduct().getProductCode() == 1

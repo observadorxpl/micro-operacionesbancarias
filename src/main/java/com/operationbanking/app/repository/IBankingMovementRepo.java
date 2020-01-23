@@ -11,14 +11,14 @@ import reactor.core.publisher.Flux;
 
 public interface IBankingMovementRepo extends ReactiveMongoRepository<BankingMovement, String> {
 	@Query("{'customerBankingProduct.customer.idCustomer' : ?0}")
-	Flux<BankingMovement> buscarPorIdCliente(String idCliente);
+	Flux<BankingMovement> buscarPorIdCliente(String idCustomer);
 
-	@Query("{'customerBankingProduct.accountNumber' : ?0, 'movementDate' : ?1}")
-	Flux<BankingMovement> buscarPorNumeroCuenta(String numeroCuenta, String tipoOperacion);
+	@Query("{'customerBankingProduct.accountNumber' : ?0, 'operationType' : ?1}")
+	Flux<BankingMovement> buscarPorNumeroCuenta(String accountNumber, String operationType);
 
 	@Query("{'customerBankingProduct.accountNumber' : ?0, 'movementDate' : { $gte: ?1, $lte: ?2 }, 'interests': { $gt: ?3 } }")
-	Flux<BankingMovement> buscarPorNumeroCuentaYRangoFechas(String numeroCuenta, Date rangoInicio,
-			Date rangoFin, Double intereses);
+	Flux<BankingMovement> buscarPorNumeroCuentaYRangoFechas(String accountNumber, Date rangoInicio,
+			Date rangoFin, Double interests);
 	
 	@Query("{'movementDate' : { $gte: ?0, $lte: ?1 } }")                 
 	public Flux<BankingMovement> buscarPorRangoFechas(Date rangoInicio, Date rangoFin); 
