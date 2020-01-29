@@ -1,10 +1,16 @@
 package com.operationbanking.app.business;
 
+import java.util.ArrayList;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.operationbanking.app.consolidado.BankDescription;
+import com.operationbanking.app.consolidado.ReporteConsolidadoDTO;
+import com.operationbanking.app.dto.CustomerCreditProduct;
+import com.operationbanking.app.models.Bank;
 import com.operationbanking.app.models.BankingProduct;
 import com.operationbanking.app.models.Customer;
 import com.operationbanking.app.models.CustomerBankingProduct;
@@ -19,10 +25,10 @@ public class CustomerProductServiceImpl implements ICustomerProductService {
 
 	@Autowired
 	private ICustomerBankingProductRepository customerProductRepo;
-	
+
 	@Value("${com.bootcamp.gateway.url}")
 	private String gatewayUrlPort;
-	
+
 	@Override
 	public Flux<CustomerBankingProduct> findAll() {
 		return customerProductRepo.findAll();
@@ -50,8 +56,9 @@ public class CustomerProductServiceImpl implements ICustomerProductService {
 
 	@Override
 	public Flux<ReporteProductoSaldoDTO> reporteProductosSaldo(String idCliente) {
-		return WebClient.builder().baseUrl("http://"+gatewayUrlPort+"/micro-clientes/customers/").build().get()
-				.uri(idCliente).retrieve().bodyToMono(Customer.class).log().flatMapMany(cli -> {
+		return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-clientes/customers/").build().get()
+				.uri(idCliente).retrieve().bodyToMono(Customer.class).log()
+				.flatMapMany(cli -> {
 					return customerProductRepo.findByCustomer(cli);
 				}).flatMap(clPro -> {
 					return Flux.just(new ReporteProductoSaldoDTO(clPro.getBankingProduct().getDescription(),
@@ -61,7 +68,7 @@ public class CustomerProductServiceImpl implements ICustomerProductService {
 
 	@Override
 	public Flux<CustomerBankingProduct> findByCliente(String idCliente) {
-		return WebClient.builder().baseUrl("http://"+gatewayUrlPort+"/micro-clientes/customers/").build().get()
+		return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-clientes/customers/").build().get()
 				.uri(idCliente).retrieve().bodyToMono(Customer.class).log().flatMapMany(cli -> {
 					return customerProductRepo.findByCustomer(cli);
 				});
@@ -69,20 +76,48 @@ public class CustomerProductServiceImpl implements ICustomerProductService {
 
 	@Override
 	public Mono<CustomerBankingProduct> saveClienteProductoBancario(CustomerBankingProduct clienteProducto) {
-		return WebClient.builder().baseUrl("http://"+gatewayUrlPort+"/micro-clientes/customers/").build().get()
+		return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-clientes/customers/").build().get()
 				.uri(clienteProducto.getCustomer().getIdCustomer()).retrieve().bodyToMono(Customer.class).log()
 				.flatMap(cl -> {
 					clienteProducto.setCustomer(cl);
-					return WebClient.builder().baseUrl("http://"+gatewayUrlPort+"/micro-bancario/products/").build().get()
-							.uri(clienteProducto.getBankingProduct().getIdProduct()).retrieve()
+					System.out.println("[API DEUDAS INICIO - CLIENTE]: " + cl);
+					return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-operacionescreditos/customers-products/deudas/").build().get()
+							.uri(cl.getDni()).retrieve().bodyToFlux(CustomerCreditProduct.class).log().count();	
+				}).flatMap(countDeudas ->{
+					
+					System.out.println("[API DEUDAS FIN - COUNT]: " + countDeudas);
+
+					if(countDeudas > 0) {
+						return Mono.error(new RuntimeException("ERROR. El cliente: " +clienteProducto.getCustomer().getFirstName()+ " " + clienteProducto.getCustomer().getLastnamePaternal() + ". DNI: " + clienteProducto.getCustomer().getDni() + " TIENE POR LO MENOS UNA DEUDA CREDITO"));
+					}
+					System.out.println("[API DEUDAS FIN - ELSE]: " + countDeudas);
+					return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-bancario/products/").build()
+							.get().uri(clienteProducto.getBankingProduct().getIdProduct()).retrieve()
 							.bodyToMono(BankingProduct.class).log();
-				}).flatMap(p -> {
+				})
+				.flatMap(p -> {
+					System.out.println("[BUSCA BANCO INI]: " + p);
 					clienteProducto.setBankingProduct(p);
-					return customerProductRepo
-							.buscarPorCodigoTipoClienteIdTipoProducto(clienteProducto.getCustomer().getIdCustomer(),
-									clienteProducto.getCustomer().getCustomerType().getCustomerTypeCode(),
-									clienteProducto.getBankingProduct().getProductCode()).doOnNext(clPro -> System.out.println("[customerProductRepo]: "+clPro))
-							.count();
+					return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-banco/bank/").build().get()
+							.uri(clienteProducto.getBank().getIdBank()).retrieve().bodyToMono(Bank.class).log();
+				}).flatMap(bank -> {
+					clienteProducto.setBank(bank);
+					System.out.println("[BUSCA BANCO FIN]: " + bank);
+
+					if (clienteProducto.getCustomer().getBank().getCodeBank() == clienteProducto.getBankingProduct()
+							.getBank().getCodeBank()
+							&& clienteProducto.getBankingProduct().getBank().getCodeBank() == clienteProducto
+									.getBankingProduct().getBank().getCodeBank()) {
+						System.out.println("[BANCOS IGUALES]");
+						return customerProductRepo
+								.buscarPorCodigoTipoClienteIdTipoProducto(clienteProducto.getCustomer().getIdCustomer(),
+										clienteProducto.getCustomer().getCustomerType().getCustomerTypeCode(),
+										clienteProducto.getBankingProduct().getProductCode(),
+										clienteProducto.getBank().getCodeBank())
+								.doOnNext(clPro -> System.out.println("[customerProductRepo]: " + clPro)).count();
+					}
+					System.out.println("[BANCOS DIFERENTES]");
+					return Mono.error(new RuntimeException("Los bancos asociados deben ser iguales"));
 				}).flatMap(count -> {
 					System.out.println("[count]" + count);
 					// SI EL CLIENTE ES PERSONAL
@@ -152,5 +187,33 @@ public class CustomerProductServiceImpl implements ICustomerProductService {
 		clienteProducto.setPass(clienteProducto.generarNumeroCuenta("0", 4));
 		clienteProducto.setBalance(0.00);
 		return clienteProducto;
+	}
+
+
+	@Override
+	public Mono<ReporteConsolidadoDTO> reporteConsolidadov2(String idCliente) {
+		ReporteConsolidadoDTO dto = new ReporteConsolidadoDTO();
+		dto.setLstDescription(new ArrayList<>());
+
+		return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-clientes/customers/").build().get()
+		.uri(idCliente).retrieve().bodyToMono(Customer.class).log()
+		.flatMapMany(cliente-> {
+			dto.setClienteNombresApellidos(cliente.getFirstName() + " " + cliente.getLastnamePaternal() + " " + cliente.getLastnameMaternal());
+			dto.setDni(cliente.getDni());
+			return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-banco/bank/").build().get()
+					.retrieve().bodyToFlux(Bank.class).log();
+		}).flatMap(banco -> {
+			return customerProductRepo.buscarPorDniYCodigoBanco(dto.getDni(), banco.getCodeBank());
+		}).map(clpro -> {
+			if(clpro != null) {
+				dto.getLstDescription().add(new BankDescription(clpro.getBank().getDescription(), clpro.getBankingProduct().getDescription(), clpro.getCustomer().getCustomerType().getDescription()));
+			}
+			return clpro;
+		}).then(Mono.just(dto));
+	}
+	@Override
+	public Flux<CustomerBankingProduct> productosXCodigoBanco(String dni) {
+		//return customerProductRepo.buscarPorDniYCodigoBanco(dni);
+		return null;
 	}
 }

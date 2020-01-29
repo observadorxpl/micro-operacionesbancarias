@@ -11,59 +11,50 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.operationbanking.app.business.ICustomerProductService;
+import com.operationbanking.app.consolidado.ReporteConsolidadoDTO;
 import com.operationbanking.app.models.CustomerBankingProduct;
 import com.operationbanking.app.models.ReporteProductoSaldoDTO;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
+@Api(value = "Banking Operation Microservice")
 @RequestMapping("/customers-products")
 public class CustomerProductController {
 	@Autowired
 	private ICustomerProductService clienteProductosService;
-	
+
 	@GetMapping("/{idCliente}")
+	@ApiOperation(value = "List products by client", notes="List all products by client's id")
 	public Flux<CustomerBankingProduct> listarProductoxCliente(@PathVariable String idCliente) {
 		return clienteProductosService.findByCliente(idCliente);
 	}
-	
+
 	@GetMapping("/reporte/{idCliente}")
+	@ApiOperation(value = "Generate a balance's report by client", notes="Generate a balance's report by client's id ")
 	public Flux<ReporteProductoSaldoDTO> reporteProductosSaldo(@PathVariable String idCliente) {
 		return clienteProductosService.reporteProductosSaldo(idCliente);
 	}
 	
+	@GetMapping("/consolidado/{idCliente}")
+	@ApiOperation(value = "Generate a consolidated report by client", notes="Generate a consolidated report by client's id ")
+	public Mono<ReporteConsolidadoDTO> consolidado(@PathVariable String idCliente) {
+		return clienteProductosService.reporteConsolidadov2(idCliente);
+	}
+	
+	@GetMapping("/cliente-productos/{dni}")
+	@ApiOperation(value = "List products by client's dni")
+	public Flux<CustomerBankingProduct> listarProductosDelCliente(@PathVariable String dni) {
+		return clienteProductosService.productosXCodigoBanco(dni);
+	}
+
 	@PostMapping
-	public Mono<CustomerBankingProduct> registrarClienteProductoBancario(@RequestBody @Valid CustomerBankingProduct clienteProductoBancario) {
+	@ApiOperation(value = "Save a customer with a product", notes = "Save and return a customer with a product, need customer, product and bank references, min(ids)")
+	public Mono<CustomerBankingProduct> registrarClienteProductoBancario(
+			@RequestBody @Valid CustomerBankingProduct clienteProductoBancario) {
 		return clienteProductosService.saveClienteProductoBancario(clienteProductoBancario);
 	}
-	/*
-	@Autowired
-	private IClienteProductosService clienteProductosService;
-
-	@GetMapping
-	public Flux<ClienteProductos> listarAllClientes() {
-		return clienteProductosService.findAll();
-	}
-
-	@GetMapping("/{id}")
-	public Mono<ClienteProductos> buscarCliente(@PathVariable String id) {
-		return clienteProductosService.finById(id);
-	}
-
-	@PostMapping
-	public Mono<ClienteProductos> registrarCliente(@RequestBody ClienteProductos clienteProductos) {
-		return clienteProductosService.save(clienteProductos);
-	}
-
-	@PutMapping
-	public Mono<ClienteProductos> actualizarCliente(@RequestBody ClienteProductos clienteProductos) {
-		return clienteProductosService.save(clienteProductos);
-	}
-
-	@DeleteMapping("/{id}")
-	public Mono<Void> eliminarCliente(@PathVariable String id){
-		return clienteProductosService.deleteById(id);
-	}
-	*/
 }

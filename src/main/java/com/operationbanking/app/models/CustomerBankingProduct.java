@@ -30,7 +30,8 @@ public class CustomerBankingProduct {
 	private Customer customer;
 	@NotNull(message = "El producto Bancario no puede ser nulo")
 	private BankingProduct bankingProduct;
-	
+	@NotNull(message = "El banco no puede ser nulo")
+	private Bank bank;
 	
 	private String accountNumber;
 	

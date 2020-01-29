@@ -33,10 +33,12 @@ public class BankingProduct {
 	@NotEmpty
 	private Integer productCode;
 	
+	@Valid
+	private Bank bank;
 
 	public BankingProduct(@NotEmpty String description, @NotEmpty Integer numMaxDeposit,
 			@NotEmpty Integer numMaxWithdrawal, @Valid BankingProductType productType, @NotEmpty Double commision,
-			@NotEmpty Integer productCode) {
+			@NotEmpty Integer productCode, @Valid Bank bank) {
 		super();
 		this.description = description;
 		this.numMaxDeposit = numMaxDeposit;
@@ -44,5 +46,6 @@ public class BankingProduct {
 		this.productType = productType;
 		this.commision = commision;
 		this.productCode = productCode;
+		this.bank = bank;
 	}
 }

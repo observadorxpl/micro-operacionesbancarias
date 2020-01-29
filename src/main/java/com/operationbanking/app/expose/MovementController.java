@@ -13,22 +13,26 @@ import com.operationbanking.app.models.BankingMovement;
 import com.operationbanking.app.models.ConsultaComisionesDTO;
 import com.operationbanking.app.models.ReporteComisionesDTO;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import reactor.core.publisher.Flux;
 
 @RestController
+@Api(value = "Banking Operation Microservice")
 @RequestMapping("/movements")
 public class MovementController {
 	@Autowired
 	private IBankingMovementService service;
 	
 	@GetMapping("/{idCliente}")
+	@ApiOperation(value = "List movements by client", notes="List movements by client's id")
 	public Flux<BankingMovement> listarMovimientos(@PathVariable String idCliente){
 		return service.listarMovimientosCliente(idCliente);
 	}
+	
 	@PostMapping(value = "/reporte-comisiones")
+	@ApiOperation(value = "List account's movements with commission charge", notes="Need structure dto: numeroCuenta, numeroCuenta, rangoFin")
 	public Flux<ReporteComisionesDTO> reporteMovimientosPorRangoFecha(@RequestBody ConsultaComisionesDTO dto){
-		System.out.println("[REPORTE COMISION]: " + dto);
 		return service.listarMovimientosPorRangoFecha(dto);
-		//return service.buscarPorRangoFechas(dto);
 	}
 }
