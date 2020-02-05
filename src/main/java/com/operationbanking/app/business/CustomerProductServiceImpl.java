@@ -106,8 +106,7 @@ public class CustomerProductServiceImpl implements ICustomerProductService {
 
 					if (clienteProducto.getCustomer().getBank().getCodeBank() == clienteProducto.getBankingProduct()
 							.getBank().getCodeBank()
-							&& clienteProducto.getBankingProduct().getBank().getCodeBank() == clienteProducto
-									.getBankingProduct().getBank().getCodeBank()) {
+							&& clienteProducto.getBankingProduct().getBank().getCodeBank() == clienteProducto.getBank().getCodeBank()) {
 						System.out.println("[BANCOS IGUALES]");
 						return customerProductRepo
 								.buscarPorCodigoTipoClienteIdTipoProducto(clienteProducto.getCustomer().getIdCustomer(),
@@ -116,7 +115,8 @@ public class CustomerProductServiceImpl implements ICustomerProductService {
 										clienteProducto.getBank().getCodeBank())
 								.doOnNext(clPro -> System.out.println("[customerProductRepo]: " + clPro)).count();
 					}
-					System.out.println("[BANCOS DIFERENTES]");
+					System.out.println("[BANCOS DIFERENTES]: " + clienteProducto.getCustomer().getBank().getCodeBank() + " " + clienteProducto.getBankingProduct()
+					.getBank().getCodeBank() + " " + clienteProducto.getBank().getCodeBank());
 					return Mono.error(new RuntimeException("Los bancos asociados deben ser iguales"));
 				}).flatMap(count -> {
 					System.out.println("[count]" + count);

@@ -1,5 +1,6 @@
 package com.operationbanking.app.models;
 
+
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -21,9 +22,11 @@ public class OperacionBancariaDTO {
 	private String numeroCuentaDestino;
 	//@NotEmpty(message = "El numero de cuenta CCI destino no puede ser nulo o estar en blanco")
 	private String numeroCuentaCCIDestino;
-	@NotEmpty
-	private String tipoOperacion;
-	@NotNull
+	@NotNull(message = "El tipo de operacion no puede ser nulo")
+	private TypeOperation typeOperation;
+	@NotNull(message = "El atm no puede ser nulo")
+	private Atm atm;
+	@NotNull(message = "El monto no puede ser nulo")
 	private double monto;
 	
 	private double interes;

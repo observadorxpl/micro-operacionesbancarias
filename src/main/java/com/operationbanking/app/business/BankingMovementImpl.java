@@ -18,12 +18,12 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class BankingMovementImpl implements IBankingMovementService {
-	
+
 	private Logger LOG = LoggerFactory.getLogger(BankingMovementImpl.class);
-	
+
 	@Value("${com.bootcamp.gateway.url}")
 	private String gatewayUrlPort;
-	
+
 	@Autowired
 	private IBankingMovementRepo movimientoRepo;
 
@@ -54,7 +54,7 @@ public class BankingMovementImpl implements IBankingMovementService {
 
 	@Override
 	public Flux<BankingMovement> listarMovimientosCliente(String idCliente) {
-		return WebClient.builder().baseUrl("http://"+gatewayUrlPort+"/micro-clientes/customers/").build().get()
+		return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-clientes/customers/").build().get()
 				.uri(idCliente).retrieve().bodyToMono(Customer.class).log().flux().defaultIfEmpty(new Customer())
 				.flatMap(c -> {
 					if (c.getIdCustomer() == null) {
@@ -62,7 +62,7 @@ public class BankingMovementImpl implements IBankingMovementService {
 						return Mono.error(new InterruptedException("El cliente no existe"));
 					}
 					return Flux.just(c);
-				}).flatMap(c ->	movimientoRepo.buscarPorIdCliente(c.getIdCustomer()));
+				}).flatMap(c -> movimientoRepo.buscarPorIdCliente(c.getIdCustomer()));
 	}
 
 	@Override
@@ -70,7 +70,7 @@ public class BankingMovementImpl implements IBankingMovementService {
 		return movimientoRepo.buscarPorNumeroCuentaYRangoFechas(dto.getNumeroCuenta(), dto.getRangoInicio(),
 				dto.getRangoFin(), 0.00).flatMap(mov -> {
 					return Flux.just(new ReporteComisionesDTO(mov.getAccountNumberOrigin(),
-							mov.getOperationType(), mov.getAmount(), mov.getInterests()));
+							mov.getTypeOperation().getDescription(), mov.getAmount(), mov.getInterests()));
 				});
 	}
 
