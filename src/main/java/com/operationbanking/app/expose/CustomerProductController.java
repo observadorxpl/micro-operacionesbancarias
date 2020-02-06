@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.operationbanking.app.business.ICustomerProductService;
 import com.operationbanking.app.consolidado.ReporteConsolidadoDTO;
+import com.operationbanking.app.dto.ReporteProductoSaldoDTO;
 import com.operationbanking.app.models.CustomerBankingProduct;
-import com.operationbanking.app.models.ReporteProductoSaldoDTO;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -45,10 +45,22 @@ public class CustomerProductController {
 		return clienteProductosService.reporteConsolidadov2(idCliente);
 	}
 	
-	@GetMapping("/cliente-productos/{dni}")
+	@GetMapping("/dni/{dni}")
 	@ApiOperation(value = "List products by client's dni")
 	public Flux<CustomerBankingProduct> listarProductosDelCliente(@PathVariable String dni) {
-		return clienteProductosService.productosXCodigoBanco(dni);
+		return clienteProductosService.productosXDni(dni);
+	}
+	
+	@GetMapping("/code-bank/{codebank}")
+	@ApiOperation(value = "List products by codeBank")
+	public Flux<CustomerBankingProduct> listarProductosDelCliente(@PathVariable Integer codebank) {
+		return clienteProductosService.productosXCodigoBanco(codebank);
+	}
+	
+	@GetMapping("/account/{accountNumber}")
+	@ApiOperation(value = "Find the client-product by accountNumber")
+	public Mono<CustomerBankingProduct> buscarPorNumeroCuenta(@PathVariable String accountNumber) {
+		return clienteProductosService.buscarPorNumeroCuenta(accountNumber);
 	}
 
 	@PostMapping
@@ -57,4 +69,6 @@ public class CustomerProductController {
 			@RequestBody @Valid CustomerBankingProduct clienteProductoBancario) {
 		return clienteProductosService.saveClienteProductoBancario(clienteProductoBancario);
 	}
+	
+	
 }

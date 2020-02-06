@@ -1,8 +1,5 @@
 package com.operationbanking.app.dto;
 
-import com.operationbanking.app.models.Bank;
-import com.operationbanking.app.models.Customer;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

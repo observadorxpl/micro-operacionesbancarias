@@ -7,12 +7,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import com.operationbanking.app.models.Atm;
-import com.operationbanking.app.models.Bank;
-import com.operationbanking.app.repository.IAtmRepository;
+import com.operationbanking.app.models.TypeOperation;
 import com.operationbanking.app.repository.ITypeOperationRepo;
+
+import reactor.core.publisher.Flux;
 @EnableCircuitBreaker
 @EnableEurekaClient
 @SpringBootApplication
@@ -21,9 +20,6 @@ public class OperacionesBancarioMsApplication implements CommandLineRunner{
 	private String gatewayUrlPort;
 	@Autowired
 	private ITypeOperationRepo typeRepo;
-	
-	@Autowired
-	private IAtmRepository atmRepo;
 
 	public static void main(String[] args) {
 		SpringApplication.run(OperacionesBancarioMsApplication.class, args);
@@ -31,6 +27,13 @@ public class OperacionesBancarioMsApplication implements CommandLineRunner{
 
 	@Override
 	public void run(String... args) throws Exception {
+		/*
+		TypeOperation type7 = new TypeOperation("Pago de Tarjeta Credito", 200, 0.0);
+		TypeOperation type8 = new TypeOperation("Abono", 201, 0.0);
+		TypeOperation type9 = new TypeOperation("Consumo", 202, 0.0);
+		
+		Flux.just(type7, type8, type9).flatMap(tipo -> typeRepo.save(tipo)).subscribe();
+		*/
 		/*
 		TypeOperation type1 = new TypeOperation("Transferencia entre mis cuentas", 100, 0.0);
 		TypeOperation type2 = new TypeOperation("Transferencia a cuentas del mismo banco", 101, 0.0);

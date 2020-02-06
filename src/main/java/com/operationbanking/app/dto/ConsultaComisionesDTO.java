@@ -1,4 +1,4 @@
-package com.operationbanking.app.models;
+package com.operationbanking.app.dto;
 
 import java.util.Date;
 

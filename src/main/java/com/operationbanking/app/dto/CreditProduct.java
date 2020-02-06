@@ -2,8 +2,6 @@ package com.operationbanking.app.dto;
 
 import java.util.Date;
 
-import com.operationbanking.app.models.Bank;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

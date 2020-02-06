@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.operationbanking.app.dto.ConsultaComisionesDTO;
+import com.operationbanking.app.dto.Customer;
+import com.operationbanking.app.dto.ReporteComisionesDTO;
 import com.operationbanking.app.models.BankingMovement;
-import com.operationbanking.app.models.ConsultaComisionesDTO;
-import com.operationbanking.app.models.Customer;
-import com.operationbanking.app.models.ReporteComisionesDTO;
 import com.operationbanking.app.repository.IBankingMovementRepo;
 
 import reactor.core.publisher.Flux;

@@ -9,12 +9,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.operationbanking.app.consolidado.BankDescription;
 import com.operationbanking.app.consolidado.ReporteConsolidadoDTO;
+import com.operationbanking.app.dto.Bank;
+import com.operationbanking.app.dto.BankingProduct;
+import com.operationbanking.app.dto.Customer;
 import com.operationbanking.app.dto.CustomerCreditProduct;
-import com.operationbanking.app.models.Bank;
-import com.operationbanking.app.models.BankingProduct;
-import com.operationbanking.app.models.Customer;
+import com.operationbanking.app.dto.ReporteProductoSaldoDTO;
 import com.operationbanking.app.models.CustomerBankingProduct;
-import com.operationbanking.app.models.ReporteProductoSaldoDTO;
 import com.operationbanking.app.repository.ICustomerBankingProductRepository;
 
 import reactor.core.publisher.Flux;
@@ -109,7 +109,7 @@ public class CustomerProductServiceImpl implements ICustomerProductService {
 							&& clienteProducto.getBankingProduct().getBank().getCodeBank() == clienteProducto.getBank().getCodeBank()) {
 						System.out.println("[BANCOS IGUALES]");
 						return customerProductRepo
-								.buscarPorCodigoTipoClienteIdTipoProducto(clienteProducto.getCustomer().getIdCustomer(),
+								.findByCustomer_IdCustomerAndCustomer_CustomerType_CustomerTypeCodeAndBankingProduct_ProductCodeAndBank_CodeBank(clienteProducto.getCustomer().getIdCustomer(),
 										clienteProducto.getCustomer().getCustomerType().getCustomerTypeCode(),
 										clienteProducto.getBankingProduct().getProductCode(),
 										clienteProducto.getBank().getCodeBank())
@@ -203,7 +203,7 @@ public class CustomerProductServiceImpl implements ICustomerProductService {
 			return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-banco/bank/").build().get()
 					.retrieve().bodyToFlux(Bank.class).log();
 		}).flatMap(banco -> {
-			return customerProductRepo.buscarPorDniYCodigoBanco(dto.getDni(), banco.getCodeBank());
+			return customerProductRepo.findByCustomer_DniAndBank_CodeBank(dto.getDni(), banco.getCodeBank());
 		}).map(clpro -> {
 			if(clpro != null) {
 				dto.getLstDescription().add(new BankDescription(clpro.getBank().getDescription(), clpro.getBankingProduct().getDescription(), clpro.getCustomer().getCustomerType().getDescription()));
@@ -212,8 +212,18 @@ public class CustomerProductServiceImpl implements ICustomerProductService {
 		}).then(Mono.just(dto));
 	}
 	@Override
-	public Flux<CustomerBankingProduct> productosXCodigoBanco(String dni) {
-		//return customerProductRepo.buscarPorDniYCodigoBanco(dni);
-		return null;
+	public Flux<CustomerBankingProduct> productosXDni(String dni) {
+		return customerProductRepo.findByCustomer_Dni(dni);
+	}
+
+	@Override
+	public Flux<CustomerBankingProduct> productosXCodigoBanco(Integer codeBank) {
+		return customerProductRepo.findByBank_CodeBank(codeBank);
+	}
+
+	@Override
+	public Mono<CustomerBankingProduct> buscarPorNumeroCuenta(String accountNumber) {
+		return customerProductRepo.findByAccountNumber(accountNumber);
+
 	}
 }

@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.operationbanking.app.business.IBankingMovementService;
+import com.operationbanking.app.dto.ConsultaComisionesDTO;
+import com.operationbanking.app.dto.ReporteComisionesDTO;
 import com.operationbanking.app.models.BankingMovement;
-import com.operationbanking.app.models.ConsultaComisionesDTO;
-import com.operationbanking.app.models.ReporteComisionesDTO;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

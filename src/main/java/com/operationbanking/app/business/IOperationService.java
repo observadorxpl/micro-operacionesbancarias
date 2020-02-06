@@ -1,7 +1,7 @@
 package com.operationbanking.app.business;
 
+import com.operationbanking.app.dto.OperacionBancariaDTO;
 import com.operationbanking.app.models.BankingMovement;
-import com.operationbanking.app.models.OperacionBancariaDTO;
 import com.operationbanking.app.models.TypeOperation;
 
 import reactor.core.publisher.Flux;
@@ -14,5 +14,7 @@ public interface IOperationService{
 	public Mono<BankingMovement> transferenciaMismoBanco (OperacionBancariaDTO dto);
 	public Mono<BankingMovement> transferenciaOtrosBancos (OperacionBancariaDTO dto);
 	public Flux<TypeOperation> listarTipoOperaciones();
+	public Mono<BankingMovement> pagoTarjetaCredito(OperacionBancariaDTO dto);
+
 	//public Mono<BankingMovement> depositoV2 (OperacionBancariaDTO dto);
 }

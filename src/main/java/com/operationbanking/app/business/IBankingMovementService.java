@@ -1,8 +1,8 @@
 package com.operationbanking.app.business;
 
+import com.operationbanking.app.dto.ConsultaComisionesDTO;
+import com.operationbanking.app.dto.ReporteComisionesDTO;
 import com.operationbanking.app.models.BankingMovement;
-import com.operationbanking.app.models.ConsultaComisionesDTO;
-import com.operationbanking.app.models.ReporteComisionesDTO;
 import com.operationbanking.app.util.ICRUD;
 
 import reactor.core.publisher.Flux;

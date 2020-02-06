@@ -5,12 +5,17 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 
+import com.operationbanking.app.dto.Atm;
+import com.operationbanking.app.dto.CustomerCreditProduct;
+import com.operationbanking.app.dto.OperacionBancariaDTO;
 import com.operationbanking.app.models.BankingMovement;
-import com.operationbanking.app.models.OperacionBancariaDTO;
 import com.operationbanking.app.models.TypeOperation;
-import com.operationbanking.app.repository.IAtmRepository;
 import com.operationbanking.app.repository.IBankingMovementRepo;
 import com.operationbanking.app.repository.ICustomerBankingProductRepository;
 import com.operationbanking.app.repository.ITypeOperationRepo;
@@ -20,14 +25,17 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class OperationServiceImpl implements IOperationService {
-	private Logger log = LoggerFactory.getLogger(BankingMovementImpl.class);
+	private Logger log = LoggerFactory.getLogger(OperationServiceImpl.class);
+	
+	@Value("${com.bootcamp.gateway.url}")
+	private String gatewayUrlPort;
+	
 	@Autowired
 	private ICustomerBankingProductRepository clientProductRepo;
 	@Autowired
 	private IBankingMovementRepo repo;
 	@Autowired
 	ITypeOperationRepo typeRepo;
-	@Autowired IAtmRepository atmRepo;
 
 	// Actualiza el saldo de la cuenta destino y genera un movimiento bancario.
 	// La cuenta de origen se registra como nulo
@@ -39,7 +47,9 @@ public class OperationServiceImpl implements IOperationService {
 				return Mono.error(new RuntimeException(
 						"El tipo de operacion es incorrecta: " + dto.getTypeOperation().getDescription()));
 			}
-			return atmRepo.findById(dto.getAtm().getIdAtm());
+			return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-banco/atm/").build().get()
+					.uri(dto.getAtm().getIdAtm()).retrieve().bodyToMono(Atm.class).log();
+					//atmRepo.findById(dto.getAtm().getIdAtm());
 		}).flatMap(atm -> {
 			dto.setAtm(atm);
 			return repo.buscarPorNumeroCuenta(dto.getNumeroCuentaDestino(), 105).count();
@@ -76,7 +86,9 @@ public class OperationServiceImpl implements IOperationService {
 				return Mono.error(new RuntimeException(
 						"El tipo de operacion es incorrecta: " + dto.getTypeOperation().getDescription()));
 			}
-			return atmRepo.findById(dto.getAtm().getIdAtm());
+			return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-banco/atm/").build().get()
+					.uri(dto.getAtm().getIdAtm()).retrieve().bodyToMono(Atm.class).log();
+					//atmRepo.findById(dto.getAtm().getIdAtm());
 		}).flatMap(atm -> {
 			dto.setAtm(atm);
 			return repo.buscarPorNumeroCuenta(dto.getNumeroCuentaDestino(), 105).count();
@@ -110,7 +122,9 @@ public class OperationServiceImpl implements IOperationService {
 				return Mono.error(new RuntimeException(
 						"El tipo de operacion es incorrecta: " + dto.getTypeOperation().getDescription()));
 			}
-			return atmRepo.findById(dto.getAtm().getIdAtm());
+			return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-banco/atm/").build().get()
+					.uri(dto.getAtm().getIdAtm()).retrieve().bodyToMono(Atm.class).log();
+					//atmRepo.findById(dto.getAtm().getIdAtm());
 		}).flatMap(atm -> {
 			dto.setAtm(atm);
 			return clientProductRepo.findByAccountNumber(dto.getNumeroCuentaOrigen());
@@ -145,7 +159,9 @@ public class OperationServiceImpl implements IOperationService {
 				return Mono.error(new RuntimeException("El numero de cuenta CCI Destino no puede ser nulo o vacio: "
 						+ dto.getNumeroCuentaCCIDestino()));
 			}
-			return atmRepo.findById(dto.getAtm().getIdAtm());
+			return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-banco/atm/").build().get()
+					.uri(dto.getAtm().getIdAtm()).retrieve().bodyToMono(Atm.class).log();
+					//atmRepo.findById(dto.getAtm().getIdAtm());
 		}).flatMap(atm -> {
 			dto.setAtm(atm);
 			return clientProductRepo.findByAccountNumber(dto.getNumeroCuentaOrigen());
@@ -168,5 +184,57 @@ public class OperationServiceImpl implements IOperationService {
 	@Override
 	public Flux<TypeOperation> listarTipoOperaciones(){
 		return typeRepo.findAll();
+	}
+	
+	// Actualiza el saldo de la cuenta bancaria y abona al saldo de la tarjeta de credito
+	// Genera un movimiento con cuenta origen (bancaria),
+	// cliente-producto afectado de tipo credito
+	@Transactional
+	@Override
+	public Mono<BankingMovement> pagoTarjetaCredito(OperacionBancariaDTO dto) {
+		log.info("1. OperationServiceImpl pago-tarjeta [INICIO], OperacionBancariadto: " + dto);
+			return typeRepo.findById(dto.getTypeOperation().getIdTypeOperation()).flatMap(type -> {
+				dto.setTypeOperation(type);
+				log.info("2. OperationServiceImpl pago-tarjeta [SET TYPEOPERACION dto]: " + dto);
+				if(dto.getTypeOperation().getCodeTypeOperation() != 200) {
+					return Mono.error(new RuntimeException("El tipo de operacion es incorrecta: " + dto.getTypeOperation().getDescription()));
+				}
+				if (dto.getNumeroTarjetaDestino() == null || dto.getNumeroTarjetaDestino().length() < 1) {
+					return Mono.error(new RuntimeException("El numero tarjeta Destino no puede ser nulo o vacio: "
+							+ dto.getNumeroCuentaCCIDestino()));
+				}
+				return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-banco/atm/").build().get()
+						.uri(dto.getAtm().getIdAtm()).retrieve().bodyToMono(Atm.class).log();
+						//atmRepo.findById(dto.getAtm().getIdAtm());
+			}).flatMap(atm -> {
+				dto.setAtm(atm);
+				log.info("3. OperationServiceImpl pago-tarjeta [SET ATM dto]: " + dto);
+				return clientProductRepo.findByAccountNumber(dto.getNumeroCuentaOrigen());
+			}).flatMap(clPro -> {
+				log.info("4. OperationServiceImpl pago-tarjeta [INICIO], Cuenta Origen: " + clPro);
+				dto.setInteres(dto.getMonto() * dto.getTypeOperation().getInterest());
+				if (clPro.getBalance() >= dto.getMonto()) {
+					clPro.setBalance(clPro.getBalance() - dto.getMonto() - dto.getInteres());
+					log.info("4. OperationServiceImpl pago-tarjeta [ACTUALIZANDO], Cuenta Origen: " + clPro);
+					return clientProductRepo.save(clPro);
+				}
+				return Mono.error(new InterruptedException("No tiene el saldo suficiente para realizar la transferencia"));
+			}).flatMap(clPro -> {
+				log.info("5. OperationServiceImpl pago-tarjeta [INICIO], WebClient Buscando Tarjeta credito: " + clPro);
+				//card/{numeroTarjeta}
+				return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-operacionescreditos/customers-products/card/").build().get()
+				.uri(dto.getNumeroTarjetaDestino()).retrieve().bodyToMono(CustomerCreditProduct.class).log();
+			}).flatMap(clProC -> {
+				clProC.setBalance(clProC.getBalance() + dto.getMonto());
+				log.info("6. OperationServiceImpl pago-tarjeta [ENCONTRADO], WebClient Buscando Tarjeta credito: " + clProC);
+				return WebClient.builder().baseUrl("http://" + gatewayUrlPort + "/micro-operacionescreditos/customers-products/").build().put()
+						.body(BodyInserters.fromValue(clProC)).retrieve().bodyToMono(CustomerCreditProduct.class).log(); 
+			}).flatMap(clProC -> {
+				log.info("7. OperationServiceImpl pago-tarjeta [ACTUALIZANDO], WebClient Buscando Tarjeta credito: " + clProC);
+				BankingMovement mov = new BankingMovement(dto.getNumeroCuentaOrigen(), clProC, dto.getMonto(),
+						dto.getInteres(), dto.getTypeOperation(),dto.getAtm(), new Date());
+				return repo.save(mov);
+			});
+
 	}
 }

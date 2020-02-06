@@ -3,8 +3,6 @@ package com.operationbanking.app.dto;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
-import com.operationbanking.app.models.Bank;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
